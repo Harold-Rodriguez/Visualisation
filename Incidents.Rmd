@@ -1,0 +1,73 @@
+---
+title: "Incidents San Francisco"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(rAmCharts)
+library(leaflet)
+```
+
+```{r global, include=FALSE}
+source('global.R')
+start <- min(data$Date)
+end <- max(data$Date)
+```
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+dateRangeInput("daterange", "Periode",
+                           start = start,
+                           end   = end,
+                           min   = start,
+                           max   = end,
+                           language = "fr",
+                           separator = "-", 
+                           format = "dd/mm/yyyy"
+            )
+```
+
+```{r reactive, include=FALSE}
+debut <- reactive({input$daterange[1]})
+fin <- reactive({input$daterange[2]})
+```
+
+
+Row {data-height=1/2}
+-----------------------------------------------------------------------
+
+### Incidents par district
+
+```{r}
+renderLeaflet({
+  geomap(debut(), fin())
+})
+```
+
+### Répartition des incidents
+
+```{r}
+renderLeaflet({
+  clustermap(debut(), fin())
+})
+```
+
+
+Row {data-height=1/2}
+-----------------------------------------------------------------------
+
+### Time serie {.no-title}
+
+```{r}
+renderAmCharts({
+  ts_plot(debut(), fin())
+})
+```
+
